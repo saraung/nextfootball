@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import api from "@/lib/api/axios"
 
 export default function RegisterPage() {
@@ -33,19 +34,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="fc-page-wrap flex min-h-[calc(100vh-68px)] items-center justify-center py-10">
       <form
         onSubmit={handleRegister}
-        className="w-full max-w-md p-8 border rounded-lg shadow"
+        className="fc-card fc-reveal w-full max-w-md p-7 sm:p-9"
       >
-        <h1 className="text-2xl font-bold mb-6">Register</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-[#2f5a43]">Join The Club</p>
+        <h1 className="fc-display mt-2 text-5xl leading-none text-[#163825]">Register</h1>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && (
+          <p className="mb-4 mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-2 mb-4 border rounded"
+          className="fc-input mt-5"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -54,7 +60,7 @@ export default function RegisterPage() {
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-2 mb-4 border rounded"
+          className="fc-input mt-3"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -63,16 +69,16 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white p-2 rounded"
+          className="fc-btn fc-btn-primary mt-5 w-full py-3"
         >
           {loading ? "Creating account..." : "Register"}
         </button>
 
-        <p className="mt-4 text-sm">
+        <p className="mt-4 text-sm text-[#4f6657]">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-500">
+          <Link href="/login" className="font-semibold text-[#155836] hover:underline">
             Login
-          </a>
+          </Link>
         </p>
       </form>
     </div>
