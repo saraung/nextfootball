@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import axios from "axios"
 import api from "@/lib/api/axios"
 import { useAuthStore } from "@/store/auth-store"
 
@@ -48,8 +49,12 @@ export default function LoginPage() {
       setUser(userRes.data)
 
       router.push("/")
-    } catch (err: any) {
-      setError(err?.response?.data?.detail || "Login failed")
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError((err.response?.data as { detail?: string } | undefined)?.detail || "Login failed")
+      } else {
+        setError("Login failed")
+      }
     }
 
     setLoading(false)

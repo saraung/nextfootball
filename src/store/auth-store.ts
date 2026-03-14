@@ -2,9 +2,9 @@ import { create } from "zustand"
 
 interface AuthState {
   token: string | null
-  user: any
+  user: Record<string, unknown> | null
   setToken: (token: string) => void
-  setUser: (user: any) => void
+  setUser: (user: Record<string, unknown>) => void
   logout: () => void
 }
 
