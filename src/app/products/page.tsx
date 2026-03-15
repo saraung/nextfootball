@@ -115,7 +115,7 @@ export default function ProductsPage() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-sm text-[#21452f] sm:min-w-[280px]">
+                    <div className="grid grid-cols-2 gap-3 text-sm text-[#21452f] sm:min-w-70">
                         <div className="rounded-2xl border border-[#17412b]/10 bg-white/75 p-4">
                             <p className="text-xs uppercase tracking-[0.18em] text-[#577060]">Active</p>
                             <p className="mt-2 text-3xl font-semibold">{activeProducts.length}</p>
@@ -141,16 +141,17 @@ export default function ProductsPage() {
                             style={{ animationDelay: `${index * 80}ms` }}
                         >
                             <div className="relative h-52 overflow-hidden bg-[#dce9dd]">
-                                {product.image_url ? (
-                                    <img
-                                        src={product.image_url}
-                                        alt={product.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
+                                {!product.image_url && (
                                     <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#dce9dd_0%,#f5efe2_100%)] px-6 text-center text-sm uppercase tracking-[0.18em] text-[#486354]">
                                         Image unavailable
                                     </div>
+                                )}
+                                {product.image_url && (
+                                    <div
+                                        aria-label={product.name}
+                                        className="h-full w-full bg-cover bg-center"
+                                        style={{ backgroundImage: `url(${product.image_url})` }}
+                                    />
                                 )}
 
                                 <div className="absolute left-4 top-4 flex gap-2">
@@ -159,8 +160,8 @@ export default function ProductsPage() {
                                     </span>
                                     <span
                                         className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.16em] ${product.is_active
-                                                ? "bg-[#eef8f1] text-[#155836]"
-                                                : "bg-[#f5e8e1] text-[#8a4b2f]"
+                                            ? "bg-[#eef8f1] text-[#155836]"
+                                            : "bg-[#f5e8e1] text-[#8a4b2f]"
                                             }`}
                                     >
                                         {product.is_active ? "Active" : "Inactive"}
