@@ -1,91 +1,117 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import axios from "axios"
-import api from "@/lib/api/axios"
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/features/auth/store";
+import { ROUTES } from "@/config/routes";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [localError, setLocalError] = useState<string | null>(null);
+  const register = useAuthStore((s) => s.register);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const error = useAuthStore((s) => s.error);
+  const clearError = useAuthStore((s) => s.clearError);
+  const router = useRouter();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    setLoading(true)
-    setError("")
-
-    try {
-      await api.post("/auth/register", {
-        email,
-        password,
-      })
-
-      router.push("/login")
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError((err.response?.data as { detail?: string } | undefined)?.detail || "Registration failed")
-      } else {
-        setError("Registration failed")
-      }
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setLocalError(null);
+    if (password !== confirm) {
+      setLocalError("Passwords do not match");
+      return;
     }
-
-    setLoading(false)
+    if (password.length < 6) {
+      setLocalError("Password must be at least 6 characters");
+      return;
+    }
+    try {
+      await register(email, password);
+      router.push(ROUTES.PRODUCTS);
+    } catch {
+      // error set in store
+    }
   }
 
-  return (
-    <div className="fc-page-wrap flex min-h-[calc(100vh-68px)] items-center justify-center py-10">
-      <form
-        onSubmit={handleRegister}
-        className="fc-card fc-reveal w-full max-w-md p-7 sm:p-9"
-      >
-        <p className="text-xs uppercase tracking-[0.2em] text-[#2f5a43]">Join The Club</p>
-        <h1 className="fc-display mt-2 text-5xl leading-none text-[#163825]">Register</h1>
+  const displayError = localError || error;
 
-        {error && (
-          <p className="mb-4 mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
+  return (
+    <main className="fc-page-wrap flex min-h-[70vh] items-center justify-center py-12">
+      <div className="fc-card fc-reveal w-full max-w-md p-8">
+        <h1 className="fc-display text-4xl text-center text-[var(--primary)]">
+          JOIN THE TEAM
+        </h1>
+        <p className="mt-2 text-center text-sm text-[var(--muted)]">
+          Create your FootyConnects account
+        </p>
+
+        {displayError && (
+          <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {displayError}
+          </div>
         )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="fc-input mt-5"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <Input
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => {
+              clearError();
+              setLocalError(null);
+              setEmail(e.target.value);
+            }}
+            required
+          />
+          <Input
+            label="Password"
+            type="password"
+            placeholder="Min 6 characters"
+            value={password}
+            onChange={(e) => {
+              clearError();
+              setLocalError(null);
+              setPassword(e.target.value);
+            }}
+            required
+          />
+          <Input
+            label="Confirm Password"
+            type="password"
+            placeholder="Re-enter password"
+            value={confirm}
+            onChange={(e) => {
+              setLocalError(null);
+              setConfirm(e.target.value);
+            }}
+            required
+          />
+          <Button
+            type="submit"
+            loading={isLoading}
+            className="w-full"
+            size="lg"
+          >
+            Create Account
+          </Button>
+        </form>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="fc-input mt-3"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="fc-btn fc-btn-primary mt-5 w-full py-3"
-        >
-          {loading ? "Creating account..." : "Register"}
-        </button>
-
-        <p className="mt-4 text-sm text-[#4f6657]">
+        <p className="mt-6 text-center text-sm text-[var(--muted)]">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-[#155836] hover:underline">
-            Login
+          <Link
+            href={ROUTES.LOGIN}
+            className="font-semibold text-[var(--primary)] hover:underline"
+          >
+            Sign in
           </Link>
         </p>
-      </form>
-    </div>
-  )
+      </div>
+    </main>
+  );
 }
