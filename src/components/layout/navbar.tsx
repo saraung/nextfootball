@@ -80,12 +80,26 @@ export default function Navbar() {
                 Orders
               </Link>
               {user.is_superuser && (
-                <Link
-                  href={ROUTES.ADMIN_PRODUCTS}
-                  className="rounded-full px-3 py-2 text-[var(--primary)] font-semibold hover:bg-[var(--bg-accent)] transition-colors"
-                >
-                  Admin
-                </Link>
+                <span className="flex items-center gap-1 rounded-full border border-[var(--primary)] px-1 py-0.5">
+                  <Link
+                    href={ROUTES.ADMIN_PRODUCTS}
+                    className="rounded-full px-2 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--bg-accent)] transition-colors"
+                  >
+                    Products
+                  </Link>
+                  <Link
+                    href={ROUTES.ADMIN_ORDERS}
+                    className="rounded-full px-2 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--bg-accent)] transition-colors"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    href={ROUTES.ADMIN_USERS}
+                    className="rounded-full px-2 py-1 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--bg-accent)] transition-colors"
+                  >
+                    Users
+                  </Link>
+                </span>
               )}
               <Link
                 href={ROUTES.PROFILE}
