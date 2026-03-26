@@ -10,5 +10,6 @@ export const ROUTES = {
   PROFILE: "/profile",
   SETTINGS: "/settings",
   ADMIN_PRODUCTS: "/admin/products",
+  ADMIN_ORDERS: "/admin/orders",
   ADMIN_USERS: "/admin/users",
 } as const;
