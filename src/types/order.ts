@@ -4,6 +4,9 @@ export interface OrderItem {
   product_id: number;
   quantity: number;
   price_at_purchase: number;
+  // Enriched client-side from the products API
+  product_name?: string;
+  product_image_url?: string | null;
 }
 
 export interface Order {
