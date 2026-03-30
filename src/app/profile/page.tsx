@@ -34,7 +34,7 @@ function ProfileContent() {
         return;
       }
 
-      await api.put(ENDPOINTS.USER(user.id), body);
+      await api.patch(ENDPOINTS.USER(user.id), body);
       setPassword("");
       setMessage("Profile updated successfully!");
       await initialize();

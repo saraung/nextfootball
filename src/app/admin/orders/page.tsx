@@ -5,6 +5,7 @@ import api from "@/lib/api/axios";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 import type { Order } from "@/types/order";
 import { formatCurrency, formatDateShort } from "@/lib/utils/format";
+import { useOrderStore } from "@/features/orders/store";
 import AuthGuard from "@/lib/auth/auth-guard";
 import Loader from "@/components/ui/loader";
 import Modal from "@/components/ui/modal";
@@ -22,38 +23,21 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function AdminOrdersContent() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const orders = useOrderStore((s) => s.orders);
+  const loading = useOrderStore((s) => s.isLoading);
+  const fetchAllOrders = useOrderStore((s) => s.fetchAllOrders);
+  const updateOrderStatus = useOrderStore((s) => s.updateOrderStatus);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [newStatus, setNewStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    setLoading(true);
-    try {
-      // No global GET /orders/ endpoint exists — fetch all users first,
-      // then get each user's orders in parallel and combine.
-      const { data: users } = await api.get<{ id: number }[]>("/users/", {
-        params: { skip: 0, limit: 200 },
-      });
-      const perUser = await Promise.all(
-        users.map((u) =>
-          api
-            .get<Order[]>(`/orders/user/${u.id}`, { params: { skip: 0, limit: 100 } })
-            .then((r) => r.data)
-            .catch(() => [] as Order[]),
-        ),
-      );
-      const all = perUser.flat().sort((a, b) => b.id - a.id);
-      setOrders(all);
-    } catch {
-      /* ignore */
-    }
-    setLoading(false);
+    await fetchAllOrders(0, 100);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [fetchAllOrders]);
 
   function openOrder(order: Order) {
     setSelectedOrder(order);
@@ -66,9 +50,8 @@ function AdminOrdersContent() {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(ENDPOINTS.ORDER(selectedOrder.id), { status: newStatus });
+      await updateOrderStatus(selectedOrder.id, newStatus);
       setSelectedOrder(null);
-      load();
     } catch (err) {
       setError(getErrorMessage(err));
     }

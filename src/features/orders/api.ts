@@ -23,6 +23,21 @@ export async function getUserOrdersAPI(
   return data;
 }
 
+export async function getAllOrdersAPI(skip = 0, limit = 50): Promise<Order[]> {
+  const { data } = await api.get<Order[]>(ENDPOINTS.ORDERS, {
+    params: { skip, limit },
+  });
+  return data;
+}
+
+export async function updateOrderStatusAPI(
+  id: number | string,
+  status: string,
+): Promise<Order> {
+  const { data } = await api.patch<Order>(ENDPOINTS.ORDER(id), { status });
+  return data;
+}
+
 export async function deleteOrderAPI(id: number | string): Promise<void> {
   await api.delete(ENDPOINTS.ORDER(id));
 }
