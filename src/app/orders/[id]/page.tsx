@@ -331,7 +331,7 @@ function OrderDetailContent() {
             </div>
           </div>
 
-          {/* Shipping Info placeholder */}
+          {/* Shipping Info */}
           <div className="fc-card fc-reveal p-6">
             <h2 className="font-semibold text-[var(--text)] mb-4">Shipping</h2>
             <div className="flex items-start gap-3 text-sm text-[var(--muted)]">
@@ -339,17 +339,21 @@ function OrderDetailContent() {
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="font-medium text-[var(--text)]">Standard Delivery</p>
-                <p className="mt-0.5">
-                  {order.status === "delivered"
-                    ? "Your order has been delivered."
-                    : order.status === "shipped"
-                    ? "Your order is on the way!"
-                    : order.status === "cancelled"
-                    ? "Order was cancelled."
-                    : "Estimated 3–5 business days after dispatch."}
-                </p>
+                {order.shipping_address ? (
+                  <p className="mt-1 break-words">{order.shipping_address}</p>
+                ) : (
+                  <p className="mt-0.5">
+                    {order.status === "delivered"
+                      ? "Your order has been delivered."
+                      : order.status === "shipped"
+                      ? "Your order is on the way!"
+                      : order.status === "cancelled"
+                      ? "Order was cancelled."
+                      : "Estimated 3–5 business days after dispatch."}
+                  </p>
+                )}
               </div>
             </div>
           </div>

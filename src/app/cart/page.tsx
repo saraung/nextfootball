@@ -20,13 +20,45 @@ export default function CartPage() {
   const isLoading = useOrderStore((s) => s.isLoading);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const router = useRouter();
+
+  const [address, setAddress] = useState({
+    fullName: "",
+    phone: "",
+    line1: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+
+  const addressComplete =
+    address.fullName.trim() &&
+    address.phone.trim() &&
+    address.line1.trim() &&
+    address.city.trim() &&
+    address.state.trim() &&
+    address.pincode.trim();
+
+  const formattedAddress = addressComplete
+    ? `${address.fullName}, ${address.phone}, ${address.line1}, ${address.city}, ${address.state} - ${address.pincode}`
+    : "";
+
+  function handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
 
   async function handleCheckout() {
     if (!user) {
       router.push(ROUTES.LOGIN);
       return;
     }
+    if (!showAddressForm) {
+      setShowAddressForm(true);
+      return;
+    }
+    if (!addressComplete) return;
+
     setOrderError(null);
     try {
       const order = await placeOrder({
@@ -34,6 +66,7 @@ export default function CartPage() {
           product_id: i.product.id,
           quantity: i.quantity,
         })),
+        shipping_address: formattedAddress,
       });
       clearCart();
       setOrderSuccess(true);
@@ -116,41 +149,95 @@ export default function CartPage() {
           ))}
         </div>
 
-        {/* Order Summary */}
-        <div className="fc-card fc-reveal p-6 h-fit sticky top-24">
-          <h2 className="text-lg font-bold text-[var(--text)]">
-            Order Summary
-          </h2>
-          <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between text-[var(--muted)]">
-              <span>Subtotal</span>
-              <span>{formatCurrency(totalAmount())}</span>
+        {/* Order Summary + Checkout */}
+        <div className="space-y-4">
+          <div className="fc-card fc-reveal p-6 h-fit sticky top-24">
+            <h2 className="text-lg font-bold text-[var(--text)]">
+              Order Summary
+            </h2>
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-[var(--muted)]">
+                <span>Subtotal</span>
+                <span>{formatCurrency(totalAmount())}</span>
+              </div>
+              <div className="flex justify-between text-[var(--muted)]">
+                <span>Shipping</span>
+                <span className="text-emerald-600 font-medium">Free</span>
+              </div>
+              <div className="border-t border-[var(--card-border)] pt-2 flex justify-between text-lg font-bold text-[var(--text)]">
+                <span>Total</span>
+                <span>{formatCurrency(totalAmount())}</span>
+              </div>
             </div>
-            <div className="flex justify-between text-[var(--muted)]">
-              <span>Shipping</span>
-              <span className="text-emerald-600 font-medium">Free</span>
-            </div>
-            <div className="border-t border-[var(--card-border)] pt-2 flex justify-between text-lg font-bold text-[var(--text)]">
-              <span>Total</span>
-              <span>{formatCurrency(totalAmount())}</span>
-            </div>
+
+            {/* ── Shipping Address Form ── */}
+            {showAddressForm && (
+              <div className="mt-6 border-t border-[var(--card-border)] pt-5 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <h3 className="text-sm font-semibold text-[var(--text)]">Shipping Address</h3>
+                </div>
+
+                {[
+                  { name: "fullName", placeholder: "Full Name*", type: "text" },
+                  { name: "phone", placeholder: "Phone Number*", type: "tel" },
+                  { name: "line1", placeholder: "Address Line (Street, Area)*", type: "text" },
+                  { name: "city", placeholder: "City*", type: "text" },
+                  { name: "state", placeholder: "State*", type: "text" },
+                  { name: "pincode", placeholder: "Pincode*", type: "text" },
+                ].map((field) => (
+                  <input
+                    key={field.name}
+                    name={field.name}
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={address[field.name as keyof typeof address]}
+                    onChange={handleAddressChange}
+                    className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--bg-accent)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition"
+                  />
+                ))}
+
+                {!addressComplete && (
+                  <p className="text-xs text-[var(--muted)]">* All fields are required</p>
+                )}
+              </div>
+            )}
+
+            <Button
+              onClick={handleCheckout}
+              loading={isLoading}
+              disabled={showAddressForm && !addressComplete}
+              size="lg"
+              className="mt-6 w-full"
+            >
+              {!user
+                ? "Login to Checkout"
+                : showAddressForm
+                ? "Confirm Order"
+                : "Place Order"}
+            </Button>
+
+            {showAddressForm && (
+              <button
+                onClick={() => setShowAddressForm(false)}
+                className="mt-2 block w-full text-center text-xs text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+              >
+                ← Back to cart
+              </button>
+            )}
+
+            {!showAddressForm && (
+              <Link
+                href={ROUTES.PRODUCTS}
+                className="mt-3 block text-center text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+              >
+                Continue Shopping
+              </Link>
+            )}
           </div>
-
-          <Button
-            onClick={handleCheckout}
-            loading={isLoading}
-            size="lg"
-            className="mt-6 w-full"
-          >
-            {user ? "Place Order" : "Login to Checkout"}
-          </Button>
-
-          <Link
-            href={ROUTES.PRODUCTS}
-            className="mt-3 block text-center text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
-          >
-            Continue Shopping
-          </Link>
         </div>
       </div>
     </main>

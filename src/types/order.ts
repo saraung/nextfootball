@@ -17,6 +17,7 @@ export interface Order {
   items: OrderItem[];
   created_at: string;
   updated_at: string;
+  shipping_address?: string | null;
 }
 
 export interface CreateOrderItem {
@@ -27,4 +28,5 @@ export interface CreateOrderItem {
 export interface CreateOrderRequest {
   status?: string;
   items: CreateOrderItem[];
+  shipping_address?: string;
 }
