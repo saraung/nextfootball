@@ -9,6 +9,15 @@ export interface OrderItem {
   product_image_url?: string | null;
 }
 
+export interface ShippingAddress {
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  pincode: string; // 6-digit Indian pincode
+  country: string;
+}
+
 export interface Order {
   id: number;
   user_id: number;
@@ -17,7 +26,13 @@ export interface Order {
   items: OrderItem[];
   created_at: string;
   updated_at: string;
-  shipping_address?: string | null;
+  // Structured address fields returned by the backend
+  address_line1?: string | null;
+  address_line2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  country?: string | null;
 }
 
 export interface CreateOrderItem {
@@ -28,5 +43,5 @@ export interface CreateOrderItem {
 export interface CreateOrderRequest {
   status?: string;
   items: CreateOrderItem[];
-  shipping_address?: string;
+  shipping_address: ShippingAddress;
 }

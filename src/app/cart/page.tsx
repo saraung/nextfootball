@@ -24,27 +24,25 @@ export default function CartPage() {
   const router = useRouter();
 
   const [address, setAddress] = useState({
-    fullName: "",
-    phone: "",
-    line1: "",
+    address_line1: "",
+    address_line2: "",
     city: "",
     state: "",
     pincode: "",
+    country: "India",
   });
 
+  const pincodeValid = /^\d{6}$/.test(address.pincode.trim());
+
   const addressComplete =
-    address.fullName.trim() &&
-    address.phone.trim() &&
-    address.line1.trim() &&
+    address.address_line1.trim() &&
     address.city.trim() &&
     address.state.trim() &&
-    address.pincode.trim();
+    address.pincode.trim() &&
+    pincodeValid &&
+    address.country.trim();
 
-  const formattedAddress = addressComplete
-    ? `${address.fullName}, ${address.phone}, ${address.line1}, ${address.city}, ${address.state} - ${address.pincode}`
-    : "";
-
-  function handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAddressChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -66,7 +64,14 @@ export default function CartPage() {
           product_id: i.product.id,
           quantity: i.quantity,
         })),
-        shipping_address: formattedAddress,
+        shipping_address: {
+          address_line1: address.address_line1.trim(),
+          address_line2: address.address_line2.trim() || undefined,
+          city: address.city.trim(),
+          state: address.state.trim(),
+          pincode: address.pincode.trim(),
+          country: address.country.trim(),
+        },
       });
       clearCart();
       setOrderSuccess(true);
@@ -182,26 +187,34 @@ export default function CartPage() {
                 </div>
 
                 {[
-                  { name: "fullName", placeholder: "Full Name*", type: "text" },
-                  { name: "phone", placeholder: "Phone Number*", type: "tel" },
-                  { name: "line1", placeholder: "Address Line (Street, Area)*", type: "text" },
+                  { name: "address_line1", placeholder: "Address Line 1 (Street, Area)*", type: "text" },
+                  { name: "address_line2", placeholder: "Address Line 2 (Apt, Floor) — optional", type: "text" },
                   { name: "city", placeholder: "City*", type: "text" },
                   { name: "state", placeholder: "State*", type: "text" },
-                  { name: "pincode", placeholder: "Pincode*", type: "text" },
+                  { name: "pincode", placeholder: "Pincode* (6 digits)", type: "text", maxLength: 6 },
+                  { name: "country", placeholder: "Country*", type: "text" },
                 ].map((field) => (
                   <input
                     key={field.name}
                     name={field.name}
                     type={field.type}
                     placeholder={field.placeholder}
+                    maxLength={(field as { maxLength?: number }).maxLength}
                     value={address[field.name as keyof typeof address]}
                     onChange={handleAddressChange}
-                    className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--bg-accent)] px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition"
+                    className={`w-full rounded-xl border px-3 py-2 text-sm text-[var(--text)] placeholder:text-[var(--muted)] bg-[var(--bg-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition ${
+                      field.name === "pincode" && address.pincode && !pincodeValid
+                        ? "border-red-400 ring-1 ring-red-300"
+                        : "border-[var(--card-border)]"
+                    }`}
                   />
                 ))}
 
-                {!addressComplete && (
-                  <p className="text-xs text-[var(--muted)]">* All fields are required</p>
+                {address.pincode && !pincodeValid && (
+                  <p className="text-xs text-red-500">Pincode must be exactly 6 digits</p>
+                )}
+                {!addressComplete && !(!pincodeValid && address.pincode) && (
+                  <p className="text-xs text-[var(--muted)]">* Required fields must be filled</p>
                 )}
               </div>
             )}
